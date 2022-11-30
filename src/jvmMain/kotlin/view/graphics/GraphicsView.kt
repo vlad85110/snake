@@ -12,6 +12,7 @@ import model.Action
 import model.field.Field
 import view.View
 import view.graphics.component.FieldView
+import view.graphics.component.MainScreen
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -33,7 +34,7 @@ class GraphicsView(private val field: Field): View {
                     true
                 }, state = WindowState(width = 800.dp, height = 800.dp)
             ) {
-                FieldView(field)
+                MainScreen(field)
             }
         }
     }

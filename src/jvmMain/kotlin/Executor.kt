@@ -3,6 +3,9 @@ import controller.GraphicsController
 import model.Player
 import model.field.Field
 import model.field.FieldUpdater
+import model.field.`object`.Snake
+import model.math.Point
+import model.math.Vector
 import view.View
 import view.graphics.GraphicsView
 
@@ -19,6 +22,9 @@ class Executor {
     }
 
     fun run() {
+        fieldUpdater.addSnake(Snake(3, Vector.DOWN,Point(2,2), field.size, Player("vlad")))
+        fieldUpdater.run()
+
         var isContinue = true
         while (isContinue) {
             for (controller in controllers) {

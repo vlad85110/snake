@@ -30,6 +30,7 @@ kotlin {
                 implementation("junit:junit:4.13.2")
                 implementation("org.mapstruct:mapstruct:1.5.3.Final")
                 implementation("org.mockito:mockito-core:4.8.0")
+                implementation("com.google.protobuf:protobuf-java:3.21.9")
             }
         }
         val jvmTest by getting

@@ -21,7 +21,7 @@ fun FieldView(field: Field) {
     remember { field.field }
     val size = field.size
 
-    Column(Modifier.fillMaxSize()) {
+    Column() {
         for (i in 0 until size) {
             Row(modifier = Modifier.background(Color.Black).weight(1f)) {
                 for (j in 0 until size) {
@@ -42,7 +42,7 @@ fun FieldView(field: Field) {
 
 @Composable
 @Preview
-fun fieldPreview() {
+fun FieldPreview() {
     val field = Field(30)
     val snake = Snake(5, Vector.DOWN, Point(3, 5), field.size,Player("123"))
     for (i in 3..15) {

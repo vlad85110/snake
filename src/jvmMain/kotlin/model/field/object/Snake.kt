@@ -88,4 +88,21 @@ class Snake(length: Int, startVector: Vector, startPoint: Point, private val fie
         points.add(newHeadPoint)
         headPoint = newHeadPoint
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Snake
+
+        if (fieldSize != other.fieldSize) return false
+        if (player != other.player) return false
+        if (points != other.points) return false
+        if (headPoint != other.headPoint) return false
+        if (tailPoint != other.tailPoint) return false
+        if (currentVector != other.currentVector) return false
+        if (vectorToMove != other.vectorToMove) return false
+
+        return true
+    }
 }
