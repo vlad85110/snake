@@ -1,10 +1,7 @@
 package controller.command
 
-import model.Player
-import model.field.FieldUpdater
-import view.View
+import controller.command.args.CommandArgs
 
 interface Command {
-    fun run(fieldUpdater: FieldUpdater, view: View): Boolean
-    val player: Player
+    fun run(commandArgs: CommandArgs): Boolean
 }

@@ -33,10 +33,17 @@ data class Point(val x: Int, val y: Int) {
         }
 
         return Point(newX, newY)
-        //todo проверить
     }
 
     operator fun times(other: Point): Int {
         return x * other.x + y * other.y
     }
-}
+
+    operator fun minus(other: Point): Point {
+        return Point(x - other.x, y - other.y)
+    }
+
+    operator fun plus(other: Point): Point {
+        return Point(x + other.x, y + other.y)
+    }
+ }

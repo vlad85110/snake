@@ -1,50 +1,60 @@
 package model.field.`object`
 
-import model.Player
+import model.SnakeState
 import model.math.Point
 import model.math.Vector
-import java.util.Collections
 
-class Snake(length: Int, startVector: Vector, startPoint: Point, private val fieldSize: Int, val player: Player) :
-    FieldObject(), Cloneable {
-    val points: MutableList<Point> = ArrayList()
+class Snake: FieldObject, Cloneable {
+    constructor(headPoint: Point,
+                startVector: Vector,
+                tailPoint: Point,
+                fieldSize: Int,
+                gamePlayerId: Int) {
+        this.headPoint = headPoint
+        this.currentVector = startVector
+        this.vectorToMove = startVector
+        this.tailPoint = tailPoint
+        this.fieldSize = fieldSize
+        this.gamePlayerId = gamePlayerId
+        this.points = arrayListOf()
+    }
+
+    constructor(gamePlayerId: Int, snakeState: SnakeState, vector: Vector, points: MutableList<Point>) {
+        this.headPoint = points.first()
+        this.tailPoint = points.last()
+        this.currentVector = vector
+        this.points = points
+        this.vectorToMove = vector
+        this.gamePlayerId = gamePlayerId
+    }
+
+
     var headPoint: Point
-    private var tailPoint: Point = startPoint
-    var currentVector = startVector
+    private var tailPoint: Point
+    private var fieldSize: Int? = null
+    val gamePlayerId: Int
 
-    var vectorToMove: Vector = startVector
+    val points: MutableList<Point>
+    var currentVector: Vector
+    var state = SnakeState.ALIVE
+
+    var vectorToMove: Vector
         set(value) {
             if (!currentVector.isCollinear(value)) {
                 field = value
             }
         }
 
-    init {
-        var point = startPoint
-        points.add(point)
-
-        for (i in 0 until length) {
-            point = point.nextPoint(startVector, fieldSize)
-            points.add(point)
-        }
-
-        headPoint = point
-    }
-
     public override fun clone(): Snake {
         return super.clone() as Snake
     }
 
-    override fun hashCode(): Int {
-        return player.name.hashCode()
-    }
-
     fun isIt(point: Point): Boolean {
-       return getPointInSnakeCount(point) >= 1
+        return getPointInSnakeCount(point) >= 1
     }
 
     fun isSelfCollision(point: Point): Boolean {
-        return getPointInSnakeCount(point) >=  2
+        return getPointInSnakeCount(point) >= 2
     }
 
     private fun getPointInSnakeCount(point: Point): Int {
@@ -59,13 +69,13 @@ class Snake(length: Int, startVector: Vector, startPoint: Point, private val fie
         return cnt
     }
 
-    val getHeadLine: List<Point>
+    val headLine: List<Point>
         get() {
-            val res  = ArrayList<Point>()
+            val res = ArrayList<Point>()
             var point = headPoint
 
             do {
-                point = point.nextPoint(currentVector, fieldSize)
+                point = point.nextPoint(currentVector, fieldSize!!)
                 res.add(point)
             } while (point != headPoint)
 
@@ -73,7 +83,7 @@ class Snake(length: Int, startVector: Vector, startPoint: Point, private val fie
         }
 
     fun move() {
-        val newHeadPoint = headPoint.nextPoint(vectorToMove, fieldSize)
+        val newHeadPoint = headPoint.nextPoint(vectorToMove, fieldSize!!)
         currentVector = vectorToMove
         points.add(newHeadPoint)
         headPoint = newHeadPoint
@@ -83,26 +93,9 @@ class Snake(length: Int, startVector: Vector, startPoint: Point, private val fie
     }
 
     fun grow() {
-        val newHeadPoint = headPoint.nextPoint(vectorToMove, fieldSize)
+        val newHeadPoint = headPoint.nextPoint(vectorToMove, fieldSize!!)
         currentVector = vectorToMove
         points.add(newHeadPoint)
         headPoint = newHeadPoint
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Snake
-
-        if (fieldSize != other.fieldSize) return false
-        if (player != other.player) return false
-        if (points != other.points) return false
-        if (headPoint != other.headPoint) return false
-        if (tailPoint != other.tailPoint) return false
-        if (currentVector != other.currentVector) return false
-        if (vectorToMove != other.vectorToMove) return false
-
-        return true
     }
 }

@@ -1,22 +1,27 @@
 package factory
 
-import config.ConfigParse
+import config.ConfigParser
 import controller.command.Command
-import model.Action
+import exception.IncorrectCommandException
 
 class CommandFactory {
     private val names: Map<String, String>
 
     init {
-        val parser = ConfigParse()
-        names = parser.readFile("src/jvmMain/resources/commands.properties")
+        val parser = ConfigParser()
+        names = parser.commandNames
     }
 
-    fun createCommand(action: Action): Command {
-        val productClass: Class<*>
-        val actionStr = action.toString()
-        productClass = Class.forName("controller.command.snake." + names[actionStr])
-        //todo нормальный поиск по пакетам
-        return productClass.getConstructor().newInstance() as Command
+    @Throws(IncorrectCommandException::class)
+    fun createCommand(commandName: String): Command {
+        try {
+            val className = names[commandName]!!
+            val productClass = Class.forName("controller.command." + className)
+            return productClass.getConstructor().newInstance() as Command
+        } catch (e: ClassNotFoundException) {
+            throw IncorrectCommandException("no such class")
+        } catch (e: NullPointerException) {
+            throw IncorrectCommandException("no command name in commands.properties")
+        }
     }
 }

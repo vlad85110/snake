@@ -1,11 +1,12 @@
 package model.field
 
-import model.Player
+import model.GamePlayer
+import model.GameState
 import model.field.`object`.Food
 import model.field.`object`.Snake
 import model.math.Point
+import model.math.Rectangle
 import model.math.Vector
-import view.View
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -15,12 +16,19 @@ import java.util.concurrent.TimeUnit
 class FieldUpdater(
     private val field: Field,
     private val updateRate: Long,
-    private val views: MutableMap<Player, View>,
+    private val foodSize: Int,
+    private val sendUpdate: ((GamePlayer, GameState) -> Unit)?
 ) {
     private val updateThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val snakes: MutableMap<Player, Snake> = ConcurrentHashMap()
+    private val snakes: MutableMap<Int, Snake> = ConcurrentHashMap()
+    private val players: MutableMap<Int,GamePlayer> = HashMap()
+
+    private var playersToJoin = HashSet<GamePlayer>()
     private val foodPoints: MutableSet<Point> = HashSet()
+    private val joinResults: MutableMap<GamePlayer, Boolean> = ConcurrentHashMap()
+    private val playerLocks = ConcurrentHashMap<GamePlayer, Object>()
     private var foodCount = 0
+    private var orderCnt = 0
 
     private val updateCommand = {
         val nextStepSnakes = ArrayList<Snake>()
@@ -30,14 +38,12 @@ class FieldUpdater(
         nextStepSnakes.forEach { s ->
             val head = s.headPoint
             if (isCollision(head, s)) {
-                snakes.remove(s.player)
-                views[s.player]?.showLoseMessage()
-                views.remove(s.player)
+                snakes.remove(s.gamePlayerId)
             } else if (field.isFood(head)) {
-                snakes[s.player]?.grow()
+                snakes[s.gamePlayerId]?.grow()
                 foodCount--
             } else {
-                snakes[s.player]?.move()
+                snakes[s.gamePlayerId]?.move()
             }
         }
 
@@ -50,8 +56,24 @@ class FieldUpdater(
             s.points.forEach { p -> field[p] = s }
         }
 
-        if (foodCount != snakes.size) {
-            addFood(snakes.size - foodCount)
+        if (foodCount != foodSize) {
+            addFood(foodSize - foodCount)
+        }
+
+        for (player in playersToJoin) {
+            addSnake(player)
+        }
+        playersToJoin.clear()
+
+        val state = GameState(
+            orderCnt++,
+            snakes.values.toMutableList(),
+            foodPoints.toMutableList(),
+            players.values.toMutableList()
+        )
+
+        for (player in players.values) {
+            sendUpdate?.invoke(player, state)
         }
     }
 
@@ -60,7 +82,7 @@ class FieldUpdater(
         val excludePoints = HashSet<Point>()
 
         for (s in snakes.values) {
-            excludePoints.addAll(s.getHeadLine)
+            excludePoints.addAll(s.headLine)
             excludePoints.addAll(s.points)
             excludePoints.addAll(foodPoints)
         }
@@ -75,12 +97,37 @@ class FieldUpdater(
             foodPoints.add(foodPoint)
             points.remove(foodPoint)
         }
-
-        views.values.forEach { view ->
-            view.updateField(field)
-        }
-
         foodCount++
+    }
+
+    private fun addSnake(player: GamePlayer) {
+        val startRectangle = Rectangle(Point(0, 0), Point(4, 4))
+        var rectangle = startRectangle
+        var isFree = true
+        do {
+            do {
+                for (point in rectangle.getPoints(field.size)) {
+                    isFree = isFree.and(field[point] == null)
+                }
+                if (isFree) {
+                    val headPoint = rectangle.point1 + Point(2, 2)
+                    val randomVector = Vector.values().random()
+                    val tailPoint = headPoint.nextPoint(randomVector, field.size)
+                    val snakeVector = randomVector.opposite
+                    val snake = Snake(headPoint, snakeVector, tailPoint, field.size, player.id)
+                    players[player.id] = player
+                    snakes[player.id] = snake
+                    joinResults[player] = true
+                    playerLocks[player]?.notify()
+                    return
+                }
+
+                rectangle = rectangle.move(Vector.RIGHT, field.size)
+            } while (startRectangle.point1 != rectangle.point1)
+
+            rectangle = rectangle.move(Vector.DOWN, field.size)
+        } while (startRectangle.point1 != rectangle.point2)
+        joinResults[player] = false
     }
 
     fun run() {
@@ -91,12 +138,15 @@ class FieldUpdater(
         updateThread.shutdown()
     }
 
-    fun addSnake(snake: Snake) {
-        snakes[snake.player] = snake
+    fun joinSnake(player: GamePlayer): Any {
+        playersToJoin.add(player)
+        val lock = Object()
+        playerLocks[player] = lock
+        return lock
     }
 
-    fun moveSnake(player: Player, vector: Vector) {
-        val snake = snakes[player]
+    fun moveSnake(gamePlayer: GamePlayer, vector: Vector) {
+        val snake = snakes[gamePlayer.id]
         if (snake != null) {
             snake.vectorToMove = vector
         }
@@ -113,10 +163,22 @@ class FieldUpdater(
 
     private fun isOtherSnake(point: Point, snake: Snake): Boolean {
         for (s in snakes.values) {
-            if (s.player != snake.player && s.isIt(point)) {
+            if (s.gamePlayerId != snake.gamePlayerId && s.isIt(point)) {
                 return true
             }
         }
         return false
+    }
+
+    fun isSuccessJoin(gamePlayer: GamePlayer): Boolean {
+        val lock = playerLocks[gamePlayer]
+        if (lock != null) {
+            synchronized(lock) {
+                while (!joinResults.containsKey(gamePlayer)) {
+                    lock.wait()
+                }
+                return joinResults[gamePlayer]!!
+            }
+        } else return false
     }
 }

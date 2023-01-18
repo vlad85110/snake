@@ -1,5 +1,3 @@
 package controller.command
 
-import model.Player
-
-abstract class AbstractCommand(override val player: Player): Command {}
+abstract class AbstractCommand: Command {}

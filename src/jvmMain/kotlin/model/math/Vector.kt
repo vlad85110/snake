@@ -6,7 +6,7 @@ enum class Vector {
     LEFT,
     RIGHT;
 
-    fun getCoords(): Point {
+    private fun getCoords(): Point {
         return when (this) {
             UP -> Point(0, 1)
             DOWN -> Point(0, -1)
@@ -20,4 +20,11 @@ enum class Vector {
         return true
     }
 
+    val opposite: Vector
+        get() = when (this) {
+            UP -> DOWN
+            DOWN -> UP
+            LEFT -> RIGHT
+            RIGHT -> LEFT
+        }
 }

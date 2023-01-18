@@ -8,16 +8,20 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.singleWindowApplication
+import controller.command.args.CommandArgs
+import controller.command.args.NewGameArgs
 import model.Action
+import model.GameAnnouncement
+import model.GameConfig
+import model.GameState
 import model.field.Field
 import view.View
-import view.graphics.component.FieldView
 import view.graphics.component.MainScreen
 import java.util.*
 import kotlin.concurrent.thread
 
-class GraphicsView(private val field: Field): View {
-    private var actionQueue = LinkedList<Action>()
+class GraphicsView : View {
+    private var actionQueue = LinkedList<Pair<Action, CommandArgs>>()
     private val actionLock = Object()
 
     init {
@@ -34,14 +38,16 @@ class GraphicsView(private val field: Field): View {
                     true
                 }, state = WindowState(width = 800.dp, height = 800.dp)
             ) {
-                MainScreen(field)
+                MainScreen() {
+                    setAction(Action.NEW_GAME, NewGameArgs("vlad", GameConfig(), true))
+                }
             }
         }
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
     fun keyEvent(key: Key) {
-        val  action = when (key) {
+        val action = when (key) {
             Key.DirectionLeft -> Action.LEFT
             Key.DirectionUp -> Action.UP
             Key.DirectionDown -> Action.DOWN
@@ -50,19 +56,19 @@ class GraphicsView(private val field: Field): View {
         }
 
         if (action != null) {
-            setAction(action)
+            setAction(action, CommandArgs())
         }
     }
 
-    private fun setAction(action: Action) {
+    private fun setAction(action: Action, args: CommandArgs) {
         synchronized(actionLock) {
-            actionQueue.add(action)
+            actionQueue.add(Pair(action, args))
             actionLock.notify()
         }
     }
 
-    fun getAction(): Action {
-        var action: Action?
+    fun getAction(): Pair<Action, CommandArgs> {
+        var action: Pair<Action, CommandArgs>?
 
         synchronized(actionLock) {
             do {
@@ -75,7 +81,7 @@ class GraphicsView(private val field: Field): View {
             } while (action == null)
         }
 
-        return action as Action
+        return action as Pair<Action, CommandArgs>
     }
 
     override fun updateField(field: Field) {
@@ -83,6 +89,14 @@ class GraphicsView(private val field: Field): View {
     }
 
     override fun showLoseMessage() {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateGameList(games: List<GameAnnouncement>) {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateGameState(state: GameState) {
         TODO("Not yet implemented")
     }
 }

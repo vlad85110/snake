@@ -13,6 +13,7 @@ version = "1.0-SNAPSHOT"
 repositories {
     google()
     mavenCentral()
+    gradlePluginPortal()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
@@ -28,7 +29,6 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation("junit:junit:4.13.2")
-                implementation("org.mapstruct:mapstruct:1.5.3.Final")
                 implementation("org.mockito:mockito-core:4.8.0")
                 implementation("com.google.protobuf:protobuf-java:3.21.9")
             }
@@ -51,3 +51,4 @@ compose.desktop {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
+
