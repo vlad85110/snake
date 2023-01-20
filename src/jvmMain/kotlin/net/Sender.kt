@@ -16,6 +16,11 @@ class Sender(private val socket: DatagramSocket, private val multicastSocket: Mu
         multicastSocket.send(packet)
     }
 
+    fun sendMulticastMessage(message: GameMessage) {
+        val bytes = message.toByteArray()
+        val datagramPacket = DatagramPacket(bytes, bytes.size)
+    }
+
     private fun sendAckMessage() {
 
     }

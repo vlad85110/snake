@@ -1,4 +1,5 @@
 import model.math.Point
+import model.math.Rectangle
 import model.math.Vector
 import org.junit.Assert
 import org.junit.Test
@@ -7,18 +8,9 @@ class GraphicsFieldTest {
 
     @Test
     fun pointTest() {
-        val size = 10
+        val startRectangle = Rectangle(Point(0, 0), Point(4, 4))
+        val newRectangle = startRectangle.move(Vector.RIGHT, 30)
 
-        var point = Point(0,1);
-        var nextPoint = point.nextPoint(Vector.LEFT, size)
-        Assert.assertEquals(nextPoint, Point(size - 1, 1))
-
-        point = Point(9, 1)
-        nextPoint = point.nextPoint(Vector.RIGHT, size)
-        Assert.assertEquals(nextPoint, Point(0, 1))
-
-        point = Point(0, 0)
-        nextPoint = point.nextPoint(Vector.UP, size)
-        Assert.assertEquals(nextPoint, Point(0, size - 1))
+        Assert.assertEquals(newRectangle.point1, Point(1, 0))
     }
 }

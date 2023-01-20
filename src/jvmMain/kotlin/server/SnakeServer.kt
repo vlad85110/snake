@@ -2,6 +2,8 @@ package server
 
 import config.ConfigParser
 import model.GamePlayer
+import model.field.Field
+import model.math.Vector
 import model.message.AnnouncementMessage
 import model.message.StateMessage
 import net.Endpoint
@@ -18,11 +20,13 @@ class SnakeServer(private val netModule: ServerNetModule, private val configPars
 
     private val announcerThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val announcerRunnable = {
-        val message = AnnouncementMessage()
-        games.forEach { e ->
-            message.gameAnnouncements.add(e.value.announcement)
+        if (games.isNotEmpty()) {
+            val message = AnnouncementMessage()
+            games.forEach { e ->
+                message.gameAnnouncements.add(e.value.announcement)
+            }
+            netModule.sendAnnouncementMessage(message)
         }
-        netModule.sendAnnouncementMessage(message)
     }
 
     private val messageReceiverThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -56,5 +60,18 @@ class SnakeServer(private val netModule: ServerNetModule, private val configPars
         }
 
         //todo rolechangeMessage
+    }
+
+    override fun getGameView(name: String): Field? {
+        val view = games[name]?.field
+        if (view != null) {
+            return view
+        }
+
+        return null
+    }
+
+    override fun moveSnake(gameName: String, playerName: String, vector: Vector) {
+        games[gameName]?.moveSnake(playerName, vector)
     }
 }

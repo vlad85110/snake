@@ -1,14 +1,20 @@
 package controller.command
 
+import client.ClientState
 import controller.command.args.CommandArgs
-import model.GamePlayer
 import model.math.Vector
 import model.message.SteerMessage
 
-abstract class MoveSnakeCommand(gamePlayer: GamePlayer): AbstractCommand() {
-    override fun run(commandArgs: CommandArgs): Boolean {
-        commandArgs.netModule?.sendSteerMessage(SteerMessage(getVector()))
-        return true
+abstract class MoveSnakeCommand: Command {
+    override fun run(commandArgs: CommandArgs): ClientState {
+        val isLocalGame = commandArgs.isLocalGame
+
+        if (isLocalGame) {
+            commandArgs.server?.moveSnake(commandArgs.gameNameState.value!!, commandArgs.playerName, getVector())
+        } else {
+            commandArgs.netModule?.sendSteerMessage(SteerMessage(getVector()))
+        }
+        return ClientState.IN_GAME
     }
 
     abstract fun getVector(): Vector

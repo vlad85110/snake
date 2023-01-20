@@ -16,7 +16,7 @@ class Snake: FieldObject, Cloneable {
         this.tailPoint = tailPoint
         this.fieldSize = fieldSize
         this.gamePlayerId = gamePlayerId
-        this.points = arrayListOf()
+        this.points = arrayListOf(headPoint, tailPoint)
     }
 
     constructor(gamePlayerId: Int, snakeState: SnakeState, vector: Vector, points: MutableList<Point>) {
@@ -83,8 +83,14 @@ class Snake: FieldObject, Cloneable {
         }
 
     fun move() {
-        val newHeadPoint = headPoint.nextPoint(vectorToMove, fieldSize!!)
-        currentVector = vectorToMove
+        val vector = if (vectorToMove == null) {
+            currentVector
+        } else {
+            vectorToMove
+        }
+
+        val newHeadPoint = headPoint.nextPoint(vector, fieldSize!!)
+        currentVector = vector
         points.add(newHeadPoint)
         headPoint = newHeadPoint
 

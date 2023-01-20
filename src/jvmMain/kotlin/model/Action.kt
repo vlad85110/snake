@@ -7,5 +7,6 @@ enum class Action {
     RIGHT,
     NEW_GAME,
     JOIN,
-    EXIT
+    EXIT,
+    LEAVE
 }

@@ -3,14 +3,22 @@ package view.graphics.component
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import model.field.Field
 
 @Composable
-fun MainScreen(newGame: () -> Unit) {
+fun MainScreen(fieldState: MutableState<Field?>, newGame: () -> Unit, exit: () -> Unit) {
+    remember { fieldState.value }
+
+    val field = fieldState.value
     Row {
-        if (false) {
-            FieldView(null)
+        if (field != null) {
+            Row(Modifier.weight(2f)) {
+                FieldView(field)
+            }
         } else {
             Spacer(Modifier.weight(2f))
         }
@@ -20,7 +28,7 @@ fun MainScreen(newGame: () -> Unit) {
                 Scores()
                 CurrentGame()
             }
-            Buttons(newGame)
+            Buttons(newGame,exit)
             Games(emptyList())
         }
     }

@@ -9,4 +9,5 @@ interface View {
     fun showLoseMessage()
     fun updateGameList(games: List<GameAnnouncement>)
     fun updateGameState(state: GameState)
+    fun setGameView(field: Field?)
 }

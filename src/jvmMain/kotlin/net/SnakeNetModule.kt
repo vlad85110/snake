@@ -16,21 +16,21 @@ import java.net.MulticastSocket
 class SnakeNetModule(address: String, port: Int): ServerNetModule, ClientNetModule {
     private val multicastSocket: MulticastSocket = MulticastSocket()
     private val socket = DatagramSocket()
+    private val receiver: Receiver = Receiver(socket, multicastSocket)
 
     init {
         val socketAddress = InetSocketAddress(address, port)
-       // multicastSocket.joinGroup(socketAddress, multicastSocket.networkInterface)
+        multicastSocket.joinGroup(socketAddress, multicastSocket.networkInterface)
+        receiver.run()
     }
 
     private val sender: Sender = Sender(socket, multicastSocket)
     override fun sendAnnouncementMessage(message: AnnouncementMessage) {
         val dto = AnnouncementMessageMapper.map(message)
         val builder = SnakesProto.GameMessage.newBuilder().setAnnouncement(dto)
-//        sender.sendMessage(builder.build())
+        sender.sendMulticastMessage(builder.build())
         //todo transport control
     }
-
-    private val receiver: Receiver = Receiver(socket, multicastSocket)
 
     override fun sendJoinMessage(gameName: String) {
         TODO("Not yet implemented")
@@ -43,10 +43,10 @@ class SnakeNetModule(address: String, port: Int): ServerNetModule, ClientNetModu
     }
 
     override val gameAnnouncements: List<GameAnnouncement>
-        get() = TODO("Not yet implemented")
+        get() = TODO()
 
     override fun receiveGameMessage(): Pair<Endpoint, GameMessage> {
-        TODO("Not yet implemented")
+        TODO()
     }
 
     override fun sendAckMessage(endpoint: Endpoint) {

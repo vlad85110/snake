@@ -10,7 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
 @Composable
-fun Buttons(newGame: () -> Unit) {
+fun Buttons(newGame: () -> Unit, exit: () -> Unit) {
     val color = Color(109, 36, 177)
 
     Row(Modifier.fillMaxWidth()) {
@@ -25,7 +25,7 @@ fun Buttons(newGame: () -> Unit) {
         }
         Row(Modifier.weight(1f)) {
             Button(
-                onClick = {},
+                onClick = exit,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = color)
             ) {

@@ -33,6 +33,7 @@ class FieldUpdater(
     private val updateCommand = {
         val nextStepSnakes = ArrayList<Snake>()
         snakes.forEach { e -> nextStepSnakes.add(e.value.clone()) }
+
         nextStepSnakes.forEach { s -> s.move() }
 
         nextStepSnakes.forEach { s ->
@@ -47,15 +48,15 @@ class FieldUpdater(
             }
         }
 
-        if (snakes.isEmpty()) {
-            stop()
-        }
-
+//        if (snakes.isEmpty()) {
+//            stop()
+//        }
+//
         field.clearSnakes()
         snakes.values.forEach { s ->
             s.points.forEach { p -> field[p] = s }
         }
-
+//
         if (foodCount != foodSize) {
             addFood(foodSize - foodCount)
         }
@@ -118,15 +119,21 @@ class FieldUpdater(
                     players[player.id] = player
                     snakes[player.id] = snake
                     joinResults[player] = true
-                    playerLocks[player]?.notify()
+                    val lock = playerLocks[player]
+                    if (lock != null) {
+                        synchronized(lock) {
+                            lock.notify()
+                        }
+                    }
                     return
                 }
 
                 rectangle = rectangle.move(Vector.RIGHT, field.size)
-            } while (startRectangle.point1 != rectangle.point1)
+            } while (startRectangle.point1.x != rectangle.point1.x)
 
             rectangle = rectangle.move(Vector.DOWN, field.size)
-        } while (startRectangle.point1 != rectangle.point2)
+        } while (startRectangle.point2.y != rectangle.point2.y)
+
         joinResults[player] = false
     }
 

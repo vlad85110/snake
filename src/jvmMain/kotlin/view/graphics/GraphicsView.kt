@@ -1,5 +1,7 @@
 package view.graphics
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -23,6 +25,11 @@ import kotlin.concurrent.thread
 class GraphicsView : View {
     private var actionQueue = LinkedList<Pair<Action, CommandArgs>>()
     private val actionLock = Object()
+    private val fieldVIew: MutableState<Field?> = mutableStateOf(null)
+
+    override fun setGameView(field: Field?) {
+        fieldVIew.value = field
+    }
 
     init {
         run()
@@ -38,9 +45,10 @@ class GraphicsView : View {
                     true
                 }, state = WindowState(width = 800.dp, height = 800.dp)
             ) {
-                MainScreen() {
-                    setAction(Action.NEW_GAME, NewGameArgs("vlad", GameConfig(), true))
-                }
+                MainScreen(fieldVIew,
+                    newGame = {setAction(Action.NEW_GAME, NewGameArgs("vlad", GameConfig(), true))},
+                    exit = {setAction(Action.LEAVE, CommandArgs())}
+                )
             }
         }
     }

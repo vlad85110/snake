@@ -15,30 +15,29 @@ import model.field.Field
 import model.field.`object`.Snake
 
 @Composable
-fun FieldView(field: Field?) {
-    if (field != null) {
-        remember { field.field }
-        val size = field.size
+fun FieldView(field: Field) {
+    remember { field.field }
+    val size = field.size
 
-        Column {
-            for (i in 0 until size) {
-                Row(modifier = Modifier.background(Color.Black).weight(1f)) {
-                    for (j in 0 until size) {
-                        val color = when (field[j, i]) {
-                            is Snake -> Color.Red
-                            null -> Color.Black
-                            else -> Color.Blue
-                        }
+    Column {
+        for (i in 0 until size) {
+            Row(modifier = Modifier.background(Color.Black).weight(1f)) {
+                for (j in 0 until size) {
+                    val color = when (field[j, i]) {
+                        is Snake -> {
+                            Color.Red
 
-                        Box(Modifier.background(color).weight(1f).fillMaxHeight().zIndex(1f)) {
-                            Text(" ")
                         }
+                        null -> Color.Black
+                        else -> Color.Blue
+                    }
+
+                    Box(Modifier.background(color).weight(1f).fillMaxHeight().zIndex(1f)) {
+                        Text(" ")
                     }
                 }
             }
         }
-    } else {
-
     }
 }
 

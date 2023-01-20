@@ -14,6 +14,7 @@ class AnnouncementMessageMapper {
                 builder.setGames(i, GameAnnouncementMapper.map(gameAnnouncement))
             }
 
+
             return builder.build()
         }
     }
