@@ -13,8 +13,11 @@ class SteerMessageMapper {
                 .build()
         }
 
-        fun toEntity(steerMsg: SteerMsg): SteerMessage {
-            return SteerMessage(Vector.valueOf(steerMsg.direction.toString()))
+        fun toEntity(steerMsg: SteerMsg, senderId: Int?, receiverId: Int?): SteerMessage {
+            val message = SteerMessage(Vector.valueOf(steerMsg.direction.toString()))
+            message.senderId = senderId
+            message.receiverId = receiverId
+            return  message
         }
     }
 }

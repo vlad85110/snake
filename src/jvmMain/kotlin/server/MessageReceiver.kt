@@ -9,40 +9,48 @@ import net.ServerNetModule
 class MessageReceiver(
     private val netModule: ServerNetModule,
     private val endpoints: MutableMap<GamePlayer, Endpoint>,
-    val players: MutableMap<Endpoint, GamePlayer>,
-    val games: MutableMap<String, Game>
+    val players: MutableMap<Int, GamePlayer>,
+    val games: MutableMap<String, Game>,
+    private val gamesPlayersMap: MutableMap<Int, String>
 ): Runnable {
+
+    private var idCreator: Int = 0
     override fun run() {
-        val pair =  netModule.receiveGameMessage()
-        val endpoint = pair.first
+        while (!Thread.currentThread().isInterrupted) {
+            val pair = netModule.receiveGameMessage()
+            val endpoint = pair.first
 
-        when (val message = pair.second) {
-            is JoinMessage -> {
-                val player = GamePlayer(message.playerName, message.nodeRole, message.playerType)
-                player.ipAddress = endpoint.address
-                player.port = endpoint.port
-                val success = games[message.gameName]?.joinPlayer(player)
-                if (success != null) {
-                    if (!success) {
-                        netModule.sendErrorMessage(endpoint)
+            when (val message = pair.second) {
+                is JoinMessage -> {
+                    val player = GamePlayer(message.playerName, message.nodeRole, message.playerType)
+                    player.ipAddress = endpoint.address
+                    player.port = endpoint.port
+                    val success = games[message.gameName]?.joinPlayer(player)
+                    if (success != null) {
+                        if (!success) {
+                            netModule.sendErrorMessage(endpoint)
+                        } else {
+                            netModule.sendAckMessage(endpoint, ++idCreator)
+                            endpoints[player] = endpoint
+                            gamesPlayersMap[player.id] = message.gameName
+                            players[idCreator] = player
+                        }
                     } else {
-                        //todo send about join
-                        netModule.sendAckMessage(endpoint)
-                        endpoints[player] = endpoint
-                        players[endpoint] = player
+                        netModule.sendErrorMessage(endpoint)
                     }
-                } else {
-                    netModule.sendErrorMessage(endpoint)
                 }
+
+                is SteerMessage -> {
+                    val gameName = gamesPlayersMap[message.senderId]
+                    if (gameName != null) {
+                        games[gameName]?.moveSnake(players[message.senderId]!!.name, message.vector)
+                    }
+
+                }
+
+                else -> {}
             }
 
-            is SteerMessage -> {
-                //games[message]?.moveSnake(players[endpoint]!!)
-            }
-
-            else -> {}
         }
-
-        //todo в отдельный класс
     }
 }

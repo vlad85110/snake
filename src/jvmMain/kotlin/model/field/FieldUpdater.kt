@@ -2,6 +2,7 @@ package model.field
 
 import model.GamePlayer
 import model.GameState
+import model.NodeRole
 import model.field.`object`.Food
 import model.field.`object`.Snake
 import model.math.Point
@@ -17,7 +18,7 @@ class FieldUpdater(
     private val field: Field,
     private val updateRate: Long,
     private val foodSize: Int,
-    private val sendUpdate: ((GamePlayer, GameState) -> Unit)?
+    var sendUpdate: ((GamePlayer, GameState) -> Unit)?
 ) {
     private val updateThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val snakes: MutableMap<Int, Snake> = ConcurrentHashMap()
@@ -56,7 +57,7 @@ class FieldUpdater(
         snakes.values.forEach { s ->
             s.points.forEach { p -> field[p] = s }
         }
-//
+
         if (foodCount != foodSize) {
             addFood(foodSize - foodCount)
         }
@@ -74,8 +75,12 @@ class FieldUpdater(
         )
 
         for (player in players.values) {
-            sendUpdate?.invoke(player, state)
+            if (player.nodeRole != NodeRole.MASTER) {
+                sendUpdate?.invoke(player, state)
+            }
         }
+
+        println(1)
     }
 
     private val random = Random()

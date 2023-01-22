@@ -17,7 +17,10 @@ class Game(
     private val players = HashMap<String, GamePlayer>()
     private var idCreator = 0
     var sendUpdate: ((GamePlayer, GameState) -> Unit)? = null
-
+        set (value) {
+            field = value
+            fieldUpdater.sendUpdate = value
+        }
     private val fieldUpdater = FieldUpdater(field, 200, gameConfig.foodStatic, sendUpdate)
 
     val announcement: GameAnnouncement

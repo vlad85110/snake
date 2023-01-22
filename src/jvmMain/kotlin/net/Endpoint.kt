@@ -1,3 +1,3 @@
 package net
 
-class Endpoint(val address: String, val port: Int)
+data class Endpoint(val address: String, val port: Int)

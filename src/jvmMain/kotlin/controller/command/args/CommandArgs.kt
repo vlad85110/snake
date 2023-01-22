@@ -13,5 +13,6 @@ open class CommandArgs(
     var playerName: String = "123",
     var inGame: Boolean = false,
     var isLocalGame: Boolean = false,
+    val playerIdState: MutableState<Int?> = mutableStateOf(null),
     var gameNameState: MutableState<String?> = mutableStateOf(null)
 )

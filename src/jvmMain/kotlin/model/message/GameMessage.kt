@@ -1,3 +1,6 @@
 package model.message
 
-interface GameMessage
+open class GameMessage {
+    var senderId: Int? = null
+    var receiverId: Int? = null
+}

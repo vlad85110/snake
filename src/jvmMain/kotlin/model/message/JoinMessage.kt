@@ -8,4 +8,4 @@ class JoinMessage(
     val playerName: String,
     val gameName: String,
     val nodeRole: NodeRole
-): GameMessage
+): GameMessage()

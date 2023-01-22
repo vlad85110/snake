@@ -1,6 +1,7 @@
 package view.graphics
 
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.input.key.Key
@@ -26,6 +27,7 @@ class GraphicsView : View {
     private var actionQueue = LinkedList<Pair<Action, CommandArgs>>()
     private val actionLock = Object()
     private val fieldVIew: MutableState<Field?> = mutableStateOf(null)
+    private val announcements: MutableList<GameAnnouncement> = mutableStateListOf()
 
     override fun setGameView(field: Field?) {
         fieldVIew.value = field
@@ -45,9 +47,10 @@ class GraphicsView : View {
                     true
                 }, state = WindowState(width = 800.dp, height = 800.dp)
             ) {
-                MainScreen(fieldVIew,
+                MainScreen(fieldVIew, announcements,
                     newGame = {setAction(Action.NEW_GAME, NewGameArgs("vlad", GameConfig(), true))},
-                    exit = {setAction(Action.LEAVE, CommandArgs())}
+                    exit = {setAction(Action.LEAVE, CommandArgs())},
+                    setAction = {action: Action, args: CommandArgs -> setAction(action, args)},
                 )
             }
         }
@@ -93,7 +96,7 @@ class GraphicsView : View {
     }
 
     override fun updateField(field: Field) {
-
+        setGameView(field)
     }
 
     override fun showLoseMessage() {
@@ -101,10 +104,11 @@ class GraphicsView : View {
     }
 
     override fun updateGameList(games: List<GameAnnouncement>) {
-        TODO("Not yet implemented")
+        announcements.clear()
+        announcements.addAll(games)
     }
 
     override fun updateGameState(state: GameState) {
-        TODO("Not yet implemented")
+        TODO()
     }
 }

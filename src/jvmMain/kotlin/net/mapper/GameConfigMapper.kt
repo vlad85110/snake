@@ -5,7 +5,7 @@ import model.GameConfig
 
 class GameConfigMapper {
     companion object {
-        fun map(gameConfig: GameConfig): SnakesProto.GameConfig {
+        fun toDto(gameConfig: GameConfig): SnakesProto.GameConfig {
             val builder = SnakesProto.GameConfig.newBuilder()
                 .setFoodStatic(gameConfig.foodStatic)
                 .setHeight(gameConfig.height)
@@ -13,6 +13,10 @@ class GameConfigMapper {
                 .setStateDelayMs(gameConfig.stateDelayMs)
 
             return builder.build()
+        }
+
+        fun toEntity(gameConfig: SnakesProto.GameConfig): GameConfig {
+            return GameConfig(gameConfig.width, gameConfig.height, gameConfig.foodStatic, gameConfig.stateDelayMs)
         }
     }
 }

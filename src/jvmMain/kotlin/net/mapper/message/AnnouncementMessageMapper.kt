@@ -6,16 +6,23 @@ import net.mapper.GameAnnouncementMapper
 
 class AnnouncementMessageMapper {
     companion object {
-        fun map(announcementMessage: AnnouncementMessage): AnnouncementMsg {
+        fun toDto(announcementMessage: AnnouncementMessage): AnnouncementMsg {
             val builder = AnnouncementMsg.newBuilder()
 
             for (i in announcementMessage.gameAnnouncements.indices) {
                 val gameAnnouncement = announcementMessage.gameAnnouncements[i]
-                builder.setGames(i, GameAnnouncementMapper.map(gameAnnouncement))
+                builder.addGames(GameAnnouncementMapper.toDto(gameAnnouncement))
             }
 
-
             return builder.build()
+        }
+
+        fun toEntity(announcementMsg: AnnouncementMsg): AnnouncementMessage {
+            val announcementMessage = AnnouncementMessage()
+            for (i in announcementMsg.gamesList) {
+                announcementMessage.gameAnnouncements.add(GameAnnouncementMapper.toEntity(i))
+            }
+            return announcementMessage
         }
     }
 }

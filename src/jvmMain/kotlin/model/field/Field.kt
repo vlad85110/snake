@@ -1,21 +1,47 @@
 package model.field
 
 import androidx.compose.runtime.mutableStateListOf
-import model.math.Point
+import model.GameState
 import model.field.`object`.FieldObject
 import model.field.`object`.Food
 import model.field.`object`.Snake
+import model.math.Point
 
-class Field(val size: Int) {
+class Field {
     private val mutableField: MutableList<FieldObject?>
+    val size : Int
+    private val fieldObjects: Array<FieldObject?>
+
+    constructor(size: Int) {
+        this.fieldObjects = Array(size * size, init = { null })
+        mutableField = mutableStateListOf(*fieldObjects)
+        this.size = size
+    }
+
+    constructor(gameState: GameState) {
+        this.size = 30 //todo
+
+        this.fieldObjects = Array(size * size, init = { null })
+        mutableField = mutableStateListOf(*fieldObjects)
+
+        for (s in gameState.snakes) {
+            for (p in s.points) {
+                println(p)
+                this[p] = s
+            }
+        }
+
+        for (f in gameState.foods) {
+            this[f] = Food()
+        }
+    }
     val field: List<FieldObject?>
         get() {
             return mutableField
         }
 
     init {
-        val fieldObjects: Array<FieldObject?> = Array(size * size, init = { null })
-        mutableField = mutableStateListOf(*fieldObjects)
+
     }
 
     val points: Set<Point>

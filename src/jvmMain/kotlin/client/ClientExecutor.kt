@@ -1,4 +1,5 @@
 package client
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import config.ConfigParser
 import controller.Controller
@@ -19,7 +20,7 @@ class ClientExecutor {
     private val configParser = ConfigParser()
     private val view: View = GraphicsView()
     private val netModule: SnakeNetModule = SnakeNetModule(configParser.multicastAddress, configParser.multicastPort)
-    private val server: Server = SnakeServer(netModule, configParser)
+    private val server: Server = SnakeServer(configParser)
     private val controller: Controller = GraphicsController(view as GraphicsView, netModule, server)
     private val gameAnnouncements: MutableMap<String, GameAnnouncement> = HashMap()
     private val gameScanner = GameScanner(netModule, gameAnnouncements) {
@@ -27,6 +28,7 @@ class ClientExecutor {
     }
     private val gameState: GameState? = null
     private val playerName: String = "Vlad"
+    private val playerId: MutableState<Int> = mutableStateOf(0)
     private var inGame = false
     private var isLocalGame = false
     private val gameNameState = mutableStateOf<String?>(null)
@@ -39,6 +41,7 @@ class ClientExecutor {
 
     fun run() {
         server.run()
+        Thread(messageReceiver).start()
         val scannerThread = Executors.newSingleThreadScheduledExecutor()
         val period = configParser.gameScanPeriod
         scannerThread.scheduleAtFixedRate(gameScanner, period, period, TimeUnit.MILLISECONDS)
@@ -68,6 +71,7 @@ class ClientExecutor {
 
                     ClientState.MAIN_MENU -> {
                         inGame = false
+                        isLocalGame = false
                     }
                     ClientState.EXIT -> {
                         isContinue = false

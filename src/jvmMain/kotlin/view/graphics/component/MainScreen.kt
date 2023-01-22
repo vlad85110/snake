@@ -7,11 +7,21 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import controller.command.args.CommandArgs
+import model.Action
+import model.GameAnnouncement
 import model.field.Field
 
 @Composable
-fun MainScreen(fieldState: MutableState<Field?>, newGame: () -> Unit, exit: () -> Unit) {
+fun MainScreen(
+    fieldState: MutableState<Field?>,
+    announcementsState: List<GameAnnouncement>,
+    newGame: () -> Unit,
+    exit: () -> Unit,
+    setAction: (Action, CommandArgs) -> Unit
+) {
     remember { fieldState.value }
+    remember { announcementsState }
 
     val field = fieldState.value
     Row {
@@ -28,8 +38,8 @@ fun MainScreen(fieldState: MutableState<Field?>, newGame: () -> Unit, exit: () -
                 Scores()
                 CurrentGame()
             }
-            Buttons(newGame,exit)
-            Games(emptyList())
+            Buttons(newGame, exit)
+            Games(announcementsState, setAction)
         }
     }
 }

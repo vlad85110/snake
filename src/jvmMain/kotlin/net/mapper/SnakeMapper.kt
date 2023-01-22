@@ -25,7 +25,7 @@ class SnakeMapper {
                     snake.points[i] - snake.points[i - 1]
                 }
 
-
+                builder.addPoints(CordMapper.toDto(newPoint))
             }
 
             return builder.build()

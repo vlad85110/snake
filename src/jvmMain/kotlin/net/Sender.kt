@@ -13,12 +13,22 @@ class Sender(private val socket: DatagramSocket, private val multicastSocket: Mu
 
         packet.address = InetAddress.getByName(endpoint.address)
         packet.port = endpoint.port
-        multicastSocket.send(packet)
+        socket.send(packet)
+        println("send")
     }
 
     fun sendMulticastMessage(message: GameMessage) {
         val bytes = message.toByteArray()
         val datagramPacket = DatagramPacket(bytes, bytes.size)
+
+        datagramPacket.address = InetAddress.getByName("239.255.255.254")
+        datagramPacket.port = 4446
+
+        try {
+            multicastSocket.send(datagramPacket)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun sendAckMessage() {

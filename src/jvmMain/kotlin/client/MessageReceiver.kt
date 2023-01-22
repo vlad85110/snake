@@ -2,6 +2,7 @@ package client
 
 import model.GameState
 import model.NodeRole
+import model.field.Field
 import model.message.RoleChangeMessage
 import model.message.StateMessage
 import net.ClientNetModule
@@ -20,7 +21,8 @@ class MessageReceiver(
 
             when (val message = pair.second) {
                 is StateMessage -> {
-                    view.updateGameState(message.gameState)
+                    val field = Field(message.gameState)
+                    view.updateField(field)
                 }
 
                 is RoleChangeMessage -> {

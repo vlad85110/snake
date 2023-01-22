@@ -8,14 +8,17 @@ import model.message.AnnouncementMessage
 import model.message.StateMessage
 import net.Endpoint
 import net.ServerNetModule
+import net.SnakeNetModule
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
-class SnakeServer(private val netModule: ServerNetModule, private val configParser: ConfigParser): Server {
+class SnakeServer(private val configParser: ConfigParser) : Server {
     val games: MutableMap<String, Game> = HashMap()
+    private val netModule: ServerNetModule = SnakeNetModule(configParser.multicastAddress, configParser.multicastPort)
     private val endpoints = HashMap<GamePlayer, Endpoint>()
-    private val players = HashMap<Endpoint, GamePlayer>()
+    private val players = HashMap<Int, GamePlayer>()
+    private val playerGameMap = HashMap<Int, String>()
     private var deputy: GamePlayer? = null
 
     private val announcerThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
@@ -29,8 +32,7 @@ class SnakeServer(private val netModule: ServerNetModule, private val configPars
         }
     }
 
-    private val messageReceiverThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
-    private val messageReceiver = MessageReceiver(netModule, endpoints, players, games)
+    private val messageReceiver = MessageReceiver(netModule, endpoints, players, games, playerGameMap)
 
     override fun runNewGame(game: Game) {
         games[game.gameName] = game
@@ -49,6 +51,7 @@ class SnakeServer(private val netModule: ServerNetModule, private val configPars
     override fun run() {
         val announceRate = configParser.gameAnnouncePeriod
         announcerThread.scheduleAtFixedRate(announcerRunnable, announceRate, announceRate, TimeUnit.MILLISECONDS)
+        Thread(messageReceiver).start()
     }
 
     fun stop() {

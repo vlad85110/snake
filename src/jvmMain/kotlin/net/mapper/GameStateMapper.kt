@@ -13,17 +13,18 @@ class GameStateMapper {
             val builder = SnakesProto.GameState.newBuilder()
 
             for (i in gameState.snakes.indices) {
-                builder.setSnakes(i, SnakeMapper.toDto(gameState.snakes[i]))
+                builder.addSnakes(SnakeMapper.toDto(gameState.snakes[i]))
             }
 
             for (i in gameState.foods.indices) {
-                builder.setFoods(i, CordMapper.toDto(gameState.foods[i]))
+                builder.addFoods(CordMapper.toDto(gameState.foods[i]))
             }
 
             val players = SnakesProto.GamePlayers.newBuilder()
             for (i in gameState.players.indices) {
-                players.setPlayers(i, PlayerMapper.toDto(gameState.players[i]))
+                players.addPlayers(PlayerMapper.toDto(gameState.players[i]))
             }
+
             builder.players = players.build()
 
             builder.stateOrder = gameState.stateOrder
