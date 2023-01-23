@@ -12,7 +12,14 @@ abstract class MoveSnakeCommand: Command {
         if (isLocalGame) {
             commandArgs.server?.moveSnake(commandArgs.gameNameState.value!!, commandArgs.playerName, getVector())
         } else {
-            commandArgs.netModule?.sendSteerMessage(SteerMessage(getVector()), commandArgs.gameNameState.value!!)
+            try {
+                val steerMessage = SteerMessage(getVector())
+                val gameName = commandArgs.gameNameState.value!!
+                steerMessage.senderId = commandArgs.playerIdState.value
+                commandArgs.netModule?.sendSteerMessage(steerMessage, gameName)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         return ClientState.IN_GAME
     }

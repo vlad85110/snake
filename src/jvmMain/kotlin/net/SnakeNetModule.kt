@@ -55,8 +55,10 @@ class SnakeNetModule(address: String, port: Int): ServerNetModule, ClientNetModu
 
             return if (message.hasAck()) {
                 message.receiverId
-            } else {
+            } else if (message.hasState()) {
                 -1
+            } else {
+                1
             }
         } else {
             throw NoSuchGameException(null)
@@ -77,7 +79,6 @@ class SnakeNetModule(address: String, port: Int): ServerNetModule, ClientNetModu
         }
 
     override fun receiveGameMessage(): Pair<Endpoint, GameMessage> {
-        println(socket.localPort)
         val pair = receiver.receiveMessage()
         val dto = pair.second
 
@@ -87,6 +88,10 @@ class SnakeNetModule(address: String, port: Int): ServerNetModule, ClientNetModu
 
         if (dto.hasState()) {
             return Pair(pair.first, StateMessageMapper.toEntity(dto.state))
+        }
+
+        if (dto.hasSteer()) {
+            return Pair(pair.first, SteerMessageMapper.toEntity(dto.steer, dto.senderId, null))
         }
 
         return Pair(pair.first, GameMessage())

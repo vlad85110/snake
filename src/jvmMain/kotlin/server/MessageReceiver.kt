@@ -11,7 +11,8 @@ class MessageReceiver(
     private val endpoints: MutableMap<GamePlayer, Endpoint>,
     val players: MutableMap<Int, GamePlayer>,
     val games: MutableMap<String, Game>,
-    private val gamesPlayersMap: MutableMap<Int, String>
+    private val gamesPlayersMap: MutableMap<Int, String>,
+    private val ackPlayers: MutableSet<Int>
 ): Runnable {
 
     private var idCreator: Int = 0
@@ -25,12 +26,15 @@ class MessageReceiver(
                     val player = GamePlayer(message.playerName, message.nodeRole, message.playerType)
                     player.ipAddress = endpoint.address
                     player.port = endpoint.port
+
                     val success = games[message.gameName]?.joinPlayer(player)
                     if (success != null) {
                         if (!success) {
                             netModule.sendErrorMessage(endpoint)
                         } else {
                             netModule.sendAckMessage(endpoint, ++idCreator)
+                            player.id = idCreator
+                            ackPlayers.add(player.id)
                             endpoints[player] = endpoint
                             gamesPlayersMap[player.id] = message.gameName
                             players[idCreator] = player

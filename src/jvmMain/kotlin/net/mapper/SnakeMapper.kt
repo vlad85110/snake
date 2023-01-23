@@ -22,7 +22,7 @@ class SnakeMapper {
                 val newPoint = if (i == 0) {
                     snake.points[i]
                 } else {
-                    snake.points[i] - snake.points[i - 1]
+                    snake.points[i]
                 }
 
                 builder.addPoints(CordMapper.toDto(newPoint))
@@ -42,7 +42,7 @@ class SnakeMapper {
                 val newPoint = if (i == 0) {
                     CordMapper.toEntity(pointsDto[i])
                 } else {
-                    CordMapper.toEntity(pointsDto[i]) + CordMapper.toEntity(pointsDto[i - 1])
+                    CordMapper.toEntity(pointsDto[i])
                 }
 
                  pointsEntity.add(newPoint)

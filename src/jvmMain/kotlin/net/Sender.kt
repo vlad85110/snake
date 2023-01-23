@@ -7,6 +7,7 @@ import java.net.InetAddress
 import java.net.MulticastSocket
 
 class Sender(private val socket: DatagramSocket, private val multicastSocket: MulticastSocket) {
+    @Synchronized
     fun sendMessage(message: GameMessage, endpoint: Endpoint) {
         val data = message.toByteArray()
         val packet = DatagramPacket(data, data.size)
@@ -14,7 +15,6 @@ class Sender(private val socket: DatagramSocket, private val multicastSocket: Mu
         packet.address = InetAddress.getByName(endpoint.address)
         packet.port = endpoint.port
         socket.send(packet)
-        println("send")
     }
 
     fun sendMulticastMessage(message: GameMessage) {

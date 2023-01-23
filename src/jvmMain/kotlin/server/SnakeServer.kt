@@ -20,6 +20,7 @@ class SnakeServer(private val configParser: ConfigParser) : Server {
     private val players = HashMap<Int, GamePlayer>()
     private val playerGameMap = HashMap<Int, String>()
     private var deputy: GamePlayer? = null
+    private val ackPlayers = HashSet<Int>()
 
     private val announcerThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val announcerRunnable = {
@@ -32,10 +33,11 @@ class SnakeServer(private val configParser: ConfigParser) : Server {
         }
     }
 
-    private val messageReceiver = MessageReceiver(netModule, endpoints, players, games, playerGameMap)
+    private val messageReceiver = MessageReceiver(netModule, endpoints, players, games, playerGameMap, ackPlayers)
 
     override fun runNewGame(game: Game) {
         games[game.gameName] = game
+        game.ackPlayers = ackPlayers
         game.sendUpdate = { player, state ->
             if (player.ipAddress != null && player.port != null) {
                 netModule.sendStateMessage(StateMessage(state), Endpoint(player.ipAddress!!, player.port!!))

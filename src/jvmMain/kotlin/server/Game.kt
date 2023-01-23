@@ -16,6 +16,12 @@ class Game(
     val field = Field(30)
     private val players = HashMap<String, GamePlayer>()
     private var idCreator = 0
+    var ackPlayers: MutableSet<Int> = HashSet()
+        set (value) {
+            field = value
+            fieldUpdater.ackPlayers = value
+        }
+
     var sendUpdate: ((GamePlayer, GameState) -> Unit)? = null
         set (value) {
             field = value

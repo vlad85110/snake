@@ -18,11 +18,12 @@ class FieldUpdater(
     private val field: Field,
     private val updateRate: Long,
     private val foodSize: Int,
-    var sendUpdate: ((GamePlayer, GameState) -> Unit)?
+    var sendUpdate: ((GamePlayer, GameState) -> Unit)?,
 ) {
     private val updateThread: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
     private val snakes: MutableMap<Int, Snake> = ConcurrentHashMap()
     private val players: MutableMap<Int,GamePlayer> = HashMap()
+    var ackPlayers: MutableSet<Int> = HashSet()
 
     private var playersToJoin = HashSet<GamePlayer>()
     private val foodPoints: MutableSet<Point> = HashSet()
@@ -44,6 +45,7 @@ class FieldUpdater(
             } else if (field.isFood(head)) {
                 snakes[s.gamePlayerId]?.grow()
                 foodCount--
+                foodPoints.remove(s.headPoint)
             } else {
                 snakes[s.gamePlayerId]?.move()
             }
@@ -74,13 +76,15 @@ class FieldUpdater(
             players.values.toMutableList()
         )
 
+        println(foodPoints)
+
         for (player in players.values) {
             if (player.nodeRole != NodeRole.MASTER) {
-                sendUpdate?.invoke(player, state)
+                if (ackPlayers.contains(player.id)) {
+                    sendUpdate?.invoke(player, state)
+                }
             }
         }
-
-        println(1)
     }
 
     private val random = Random()

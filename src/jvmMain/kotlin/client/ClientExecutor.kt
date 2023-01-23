@@ -28,20 +28,21 @@ class ClientExecutor {
     }
     private val gameState: GameState? = null
     private val playerName: String = "Vlad"
-    private val playerId: MutableState<Int> = mutableStateOf(0)
+    private val playerId: MutableState<Int?> = mutableStateOf(null)
     private var inGame = false
     private var isLocalGame = false
     private val gameNameState = mutableStateOf<String?>(null)
 
-    private val messageReceiverThread = Executors.newSingleThreadScheduledExecutor()
+
     private val messageReceiver = MessageReceiver(gameState, view, netModule, startNewGame =  {
 //        val game = Game()
 //        server.runNewGame(game)
     })
+    private val messageReceiverThread: MutableState<Thread?> = mutableStateOf(Thread())
 
     fun run() {
         server.run()
-        Thread(messageReceiver).start()
+        messageReceiverThread.value?.start()
         val scannerThread = Executors.newSingleThreadScheduledExecutor()
         val period = configParser.gameScanPeriod
         scannerThread.scheduleAtFixedRate(gameScanner, period, period, TimeUnit.MILLISECONDS)
@@ -59,6 +60,9 @@ class ClientExecutor {
                 args.inGame = inGame
                 args.isLocalGame = isLocalGame
                 args.gameNameState = gameNameState
+                args.receiverThreadState = messageReceiverThread
+                args.playerIdState = playerId
+                args.messageReceiverRunnable = MessageReceiver(gameState, view, netModule, startNewGame = {})
 
                 state = command.run(args)
                 when (state) {

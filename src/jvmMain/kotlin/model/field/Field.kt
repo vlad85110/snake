@@ -26,7 +26,6 @@ class Field {
 
         for (s in gameState.snakes) {
             for (p in s.points) {
-                println(p)
                 this[p] = s
             }
         }
